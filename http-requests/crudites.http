@@ -1,0 +1,59 @@
+### Create Provider
+POST http://localhost:8080/api/providers
+Content-Type: application/json
+
+{
+  "name": "ACME Pensions"
+}
+
+### Get Providers
+GET http://localhost:8080/api/providers
+Accept: application/json
+
+### Create Pot
+POST http://localhost:8080/api/pots
+Content-Type: application/json
+
+{
+  "provider": { "id": 102 },
+  "name": "Another SIPP",
+  "currency": "GBP",
+  "status": "active"
+}
+
+### Get Pots
+GET http://localhost:8080/api/pots
+Accept: application/json
+
+### Snapshot - Opening
+POST http://localhost:8080/api/snapshots
+Content-Type: application/json
+
+{
+  "pot": { "id": 103 },
+  "date": "2024-01-01",
+  "balance": 100000.0
+}
+
+### Transaction - Contribution
+POST http://localhost:8080/api/transactions
+Content-Type: application/json
+
+{
+  "pot": { "id": 102 },
+  "date": "2025-02-01",
+  "type": "contribution",
+  "amount": 8000.0
+}
+
+### Transaction - Rebate
+POST http://localhost:8080/api/transactions
+Content-Type: application/json
+
+{
+  "pot": { "id": 102 },
+  "date": "2025-02-21",
+  "type": "rebate",
+  "amount": 2000.0
+}
+

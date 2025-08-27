@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: PensionsTracker
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pensions
+    username: pensions_user
+    password: yourpassword
+  jpa:
+    hibernate:
+      ddl-auto: update   # dev only
+    properties:
+      hibernate.format_sql: true
+      hibernate.jdbc.time_zone: UTC
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+server:
+  port: 8080
+
+
