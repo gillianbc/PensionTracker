@@ -25,6 +25,10 @@ Content-Type: application/json
 GET http://localhost:8080/api/pots
 Accept: application/json
 
+### Get Pot By Id
+GET http://localhost:8080/api/pots/103
+Accept: application/json
+
 ### Snapshot - Opening
 POST http://localhost:8080/api/snapshots
 Content-Type: application/json

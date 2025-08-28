@@ -1,0 +1,3 @@
+### Get Pot Report
+GET http://localhost:8080/api/reports/102
+Accept: application/json
