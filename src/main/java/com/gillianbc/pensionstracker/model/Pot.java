@@ -14,4 +14,10 @@ public class Pot {
     String currency = "GBP";
     String status = "active"; // active|dormant|closed
     String notes;
+
+    @Column(nullable = false)
+    String planNumber;
+
+    @Column(nullable = true)
+    String schemeNumber;
 }

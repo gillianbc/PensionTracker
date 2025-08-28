@@ -15,12 +15,12 @@ POST http://localhost:8080/api/pots
 Content-Type: application/json
 
 {
-  "provider": { "id": 202 },
-  "name": "OLM Old",
+  "provider": { "id": 206 },
+  "name": "TEMP",
   "currency": "GBP",
   "status": "active",
-  "planNumber": "K1615471000",
-  "schemeNumber": "J44580"
+  "planNumber": "Pending",
+  "schemeNumber": ""
 }
 
 ### Get Pots

@@ -118,14 +118,15 @@ class ApiController {
 
     private static PotDto toPotDto(Pot pot, boolean includeProvider) {
         if (pot == null) return null;
-        ProviderDto providerDto = includeProvider ? toProviderDto(pot.getProvider()) : null;
         return new PotDto(
                 pot.getId(),
+                pot.getProvider() != null ? pot.getProvider().getId() : null,
                 pot.getName(),
                 pot.getCurrency(),
                 pot.getStatus(),
                 pot.getNotes(),
-                providerDto
+                pot.getPlanNumber(),
+                pot.getSchemeNumber() // may be null
         );
     }
 
@@ -170,9 +171,10 @@ class ApiController {
         pot.setCurrency(dto.currency());
         pot.setStatus(dto.status());
         pot.setNotes(dto.notes());
-        if (dto.provider() != null && dto.provider().id() != null) {
-            Provider provider = providerRepo.findById(dto.provider().id()).orElse(null);
-            pot.setProvider(provider);
+        pot.setPlanNumber(dto.planNumber());
+        pot.setSchemeNumber(dto.schemeNumber());
+        if (dto.providerId() != null) {
+            pot.setProvider(providerRepo.findById(dto.providerId()).orElse(null));
         } else {
             pot.setProvider(null);
         }
