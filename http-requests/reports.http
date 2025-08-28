@@ -5,3 +5,7 @@ Accept: application/json
 ### Admin: clear ALL database tables
 POST http://localhost:8080/api/admin/clear
 Accept: */*
+
+### Admin: clear pots database tables
+POST http://localhost:8080/api/admin/clear/pots
+Accept: */*

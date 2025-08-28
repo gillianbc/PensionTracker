@@ -26,4 +26,8 @@ public class DatabaseMaintenanceService {
         potRepo.deleteAll();
         providerRepo.deleteAll();
     }
+
+    public void clearPots() {
+        potRepo.deleteAll();
+    }
 }

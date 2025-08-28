@@ -3,7 +3,7 @@ POST http://localhost:8080/api/providers
 Content-Type: application/json
 
 {
-  "name": "ACME Pensions"
+  "name": "Interactive Investor"
 }
 
 ### Get Providers
@@ -15,10 +15,12 @@ POST http://localhost:8080/api/pots
 Content-Type: application/json
 
 {
-  "provider": { "id": 102 },
-  "name": "Another SIPP",
+  "provider": { "id": 202 },
+  "name": "OLM Old",
   "currency": "GBP",
-  "status": "active"
+  "status": "active",
+  "planNumber": "K1615471000",
+  "schemeNumber": "J44580"
 }
 
 ### Get Pots

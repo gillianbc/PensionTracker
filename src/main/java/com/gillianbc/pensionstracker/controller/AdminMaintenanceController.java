@@ -17,4 +17,10 @@ public class AdminMaintenanceController {
         databaseMaintenanceService.clearAllData();
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/clear/pots")
+    public ResponseEntity<Void> clearPots() {
+        databaseMaintenanceService.clearPots();
+        return ResponseEntity.noContent().build();
+    }
 }

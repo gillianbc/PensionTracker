@@ -1,0 +1,2 @@
+ALTER TABLE pot ADD COLUMN plan_number VARCHAR(255);
+ALTER TABLE pot ADD COLUMN scheme_number VARCHAR(255);
