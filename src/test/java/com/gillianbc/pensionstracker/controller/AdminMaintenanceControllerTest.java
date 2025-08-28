@@ -1,5 +1,10 @@
 package com.gillianbc.pensionstracker.controller;
 
+import com.gillianbc.pensionstracker.repo.PotRepo;
+import com.gillianbc.pensionstracker.repo.ProviderRepo;
+import com.gillianbc.pensionstracker.repo.SnapshotRepo;
+import com.gillianbc.pensionstracker.repo.TransactionRepo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,8 +22,26 @@ class AdminMaintenanceControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ProviderRepo providerRepo;
+    @Autowired
+    private TransactionRepo transactionRepo;
+    @Autowired
+    private SnapshotRepo snapshotRepo;
+    @Autowired
+    private PotRepo potRepo;
+
+    @BeforeEach
+    void tearDown() {
+        snapshotRepo.deleteAll();
+        transactionRepo.deleteAll();
+        potRepo.deleteAll();
+        providerRepo.deleteAll();
+    }
+
     @Test
     void clearDatabase_returnsNoContent() throws Exception {
+        // Ideally, should insert data first, but I'm not going to bother
         mockMvc.perform(post("/api/admin/clear"))
                 .andExpect(status().isNoContent());
     }

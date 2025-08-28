@@ -58,18 +58,8 @@ class ApiControllerTest {
 
     @Test
     void providersCrudTest() throws Exception {
-        // create
-        ProviderDto provider = new ProviderDto(null, "TestProvider", "My notes");
-        String providerJson = objectMapper.writeValueAsString(provider);
-
-        String response = mockMvc.perform(post("/api/providers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(providerJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andReturn().getResponse().getContentAsString();
-
-        ProviderDto saved = objectMapper.readValue(response, ProviderDto.class);
+        // post
+        ProviderDto saved = postProviderDto("TestProvider", "My notes");
 
         // get
         mockMvc.perform(get("/api/providers/" + saved.id()))
@@ -89,27 +79,10 @@ class ApiControllerTest {
     @Test
     void potsCrudTest() throws Exception {
         // Create provider needed for pot
-        ProviderDto provider = new ProviderDto(null, "PotProvider", "Provider for test pot");
-        String providerJson = objectMapper.writeValueAsString(provider);
-        String providerResponse = mockMvc.perform(post("/api/providers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(providerJson))
-                .andReturn().getResponse().getContentAsString();
-        ProviderDto savedProvider = objectMapper.readValue(providerResponse, ProviderDto.class);
+        ProviderDto savedProvider = postProviderDto("PotProvider", "Provider for test pot");
 
         // create pot
-        PotDto pot = new PotDto(null, savedProvider.id(), "MyPot",
-                "GBP", "ACTIVE", "Some notes", "PN123", "SN123");
-        String potJson = objectMapper.writeValueAsString(pot);
-
-        String potResponse = mockMvc.perform(post("/api/pots")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(potJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andReturn().getResponse().getContentAsString();
-
-        PotDto savedPot = objectMapper.readValue(potResponse, PotDto.class);
+        PotDto savedPot = postPotDto(savedProvider);
 
         // get
         mockMvc.perform(get("/api/pots/" + savedPot.id()))
@@ -133,33 +106,12 @@ class ApiControllerTest {
     @Test
     void snapshotsCrudTest() throws Exception {
         // need a pot first
-        ProviderDto provider = new ProviderDto(null, "SnapProvider", "");
-        String providerJson = objectMapper.writeValueAsString(provider);
-        String providerResponse = mockMvc.perform(post("/api/providers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(providerJson))
-                .andReturn().getResponse().getContentAsString();
-        ProviderDto savedProvider = objectMapper.readValue(providerResponse, ProviderDto.class);
+        ProviderDto savedProvider = postProviderDto("SnapProvider", "");
 
-        PotDto pot = new PotDto(null, savedProvider.id(), "SnapPot", "GBP", "ACTIVE", null, "123", null);
-        String potJson = objectMapper.writeValueAsString(pot);
-        String potResponse = mockMvc.perform(post("/api/pots")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(potJson))
-                .andReturn().getResponse().getContentAsString();
-        PotDto savedPot = objectMapper.readValue(potResponse, PotDto.class);
+        PotDto savedPot = postPotDto(savedProvider);
 
         // create snapshot
-        SnapshotDto snapshot = new SnapshotDto(null, savedPot.id(), TEST_DATE, Double.valueOf(123.45), "USER", "Some note");
-        String snapJson = objectMapper.writeValueAsString(snapshot);
-
-        String snapResp = mockMvc.perform(post("/api/snapshots")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(snapJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andReturn().getResponse().getContentAsString();
-        SnapshotDto savedSnap = objectMapper.readValue(snapResp, SnapshotDto.class);
+        SnapshotDto savedSnap = postSnapshotDto(savedPot);
 
         // get
         mockMvc.perform(get("/api/snapshots/" + savedSnap.id()))
@@ -176,45 +128,79 @@ class ApiControllerTest {
 
     @Test
     void transactionCrudTest() throws Exception {
-        // Create provider & pot
-        ProviderDto provider = new ProviderDto(null, "TxProvider", "");
+        // Create provider
+        ProviderDto savedProvider = postProviderDto("Acme Finance", "");
+        
+        //Create pot
+        PotDto savedPot = postPotDto(savedProvider);
+
+        // Create transaction
+        TransactionDto savedtransaction = postTransactionDto(savedPot);
+
+        // get
+        mockMvc.perform(get("/api/transactions/" + savedtransaction.id()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(savedtransaction.id()))
+                .andExpect(jsonPath("$.potId").value(savedPot.id()))
+                .andExpect(jsonPath("$.date").value(TEST_DATE.toString()))
+                .andExpect(jsonPath("$.amount").value(77.25))
+                .andExpect(jsonPath("$.note").value("Contribution"))
+                .andDo(print());
+    }
+
+    public TransactionDto postTransactionDto(PotDto savedPot) throws Exception {
+        TransactionDto transaction = new TransactionDto(null, savedPot.id(),
+                TEST_DATE, "IN", Double.valueOf(77.25), "Contribution");
+        String transactionJson = objectMapper.writeValueAsString(transaction);
+
+        String transactionResp = mockMvc.perform(post("/api/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transactionJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn().getResponse().getContentAsString();
+        TransactionDto savedtransaction = objectMapper.readValue(transactionResp, TransactionDto.class);
+        return savedtransaction;
+    }
+
+    public ProviderDto postProviderDto(String providerName, String notes) throws Exception {
+        ProviderDto provider = new ProviderDto(null, providerName, notes);
         String providerJson = objectMapper.writeValueAsString(provider);
         String providerResponse = mockMvc.perform(post("/api/providers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(providerJson))
                 .andReturn().getResponse().getContentAsString();
         ProviderDto savedProvider = objectMapper.readValue(providerResponse, ProviderDto.class);
+        return savedProvider;
+    }
 
-        PotDto pot = new PotDto(null, savedProvider.id(), "TxPot",
-                "GBP", "ACTIVE", "", "ABC123", "XYZ789");
+    public PotDto postPotDto(ProviderDto savedProvider) throws Exception {
+        PotDto pot = new PotDto(null, savedProvider.id(), "MyPot",
+                "GBP", "ACTIVE", "Some notes", "PN123", "SN123");
         String potJson = objectMapper.writeValueAsString(pot);
+
         String potResponse = mockMvc.perform(post("/api/pots")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(potJson))
-                .andReturn().getResponse().getContentAsString();
-        PotDto savedPot = objectMapper.readValue(potResponse, PotDto.class);
-
-        // Create tx
-        TransactionDto tx = new TransactionDto(null, savedPot.id(),
-                TEST_DATE, "IN", Double.valueOf(77.25), "Contribution");
-        String txJson = objectMapper.writeValueAsString(tx);
-
-        String txResp = mockMvc.perform(post("/api/transactions")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(txJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andReturn().getResponse().getContentAsString();
-        TransactionDto savedTx = objectMapper.readValue(txResp, TransactionDto.class);
 
-        // get
-        mockMvc.perform(get("/api/transactions/" + savedTx.id()))
+        PotDto savedPot = objectMapper.readValue(potResponse, PotDto.class);
+        return savedPot;
+    }
+
+    public SnapshotDto postSnapshotDto(PotDto savedPot) throws Exception {
+        SnapshotDto snapshot = new SnapshotDto(null, savedPot.id(), TEST_DATE, Double.valueOf(123.45), "USER", "Some note");
+        String snapJson = objectMapper.writeValueAsString(snapshot);
+
+        String snapResp = mockMvc.perform(post("/api/snapshots")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(snapJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(savedTx.id()))
-                .andExpect(jsonPath("$.potId").value(savedPot.id()))
-                .andExpect(jsonPath("$.date").value(TEST_DATE.toString()))
-                .andExpect(jsonPath("$.amount").value(77.25))
-                .andExpect(jsonPath("$.note").value("Contribution"))
-                .andDo(print());
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn().getResponse().getContentAsString();
+        SnapshotDto savedSnap = objectMapper.readValue(snapResp, SnapshotDto.class);
+        return savedSnap;
     }
 }
