@@ -28,6 +28,8 @@ public class DatabaseMaintenanceService {
     }
 
     public void clearPots() {
+        transactionRepo.deleteAll();
+        snapshotRepo.deleteAll();
         potRepo.deleteAll();
     }
 }

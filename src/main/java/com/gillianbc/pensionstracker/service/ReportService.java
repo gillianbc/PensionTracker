@@ -1,12 +1,13 @@
 package com.gillianbc.pensionstracker.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import com.gillianbc.pensionstracker.dto.PotReportDto;
 import com.gillianbc.pensionstracker.model.Snapshot;
 import com.gillianbc.pensionstracker.model.Transaction;
+import com.gillianbc.pensionstracker.repo.PotRepo;
 import com.gillianbc.pensionstracker.repo.SnapshotRepo;
 import com.gillianbc.pensionstracker.repo.TransactionRepo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,8 +20,13 @@ import static java.lang.Double.isFinite;
 public class ReportService {
     private final SnapshotRepo snapshotRepo;
     private final TransactionRepo txRepo;
+    private final PotRepo potRepo;
 
     public PotReportDto buildReport(Long potId) {
+        // Check if the pot exists; if not, return null (for 404 handling)
+        if (!potExists(potId)) {
+            return null;
+        }
         // 1) Get data
         List<Snapshot> snaps = snapshotRepo.findByPotIdOrderByDate(potId);
         if (snaps.isEmpty()) {
@@ -79,6 +85,16 @@ public class ReportService {
                 round(netFlows), round(growth),
                 irr == null ? null : round(irr * 100.0)
         );
+    }
+
+    /**
+     * Checks if a pot with the given ID exists in the database.
+     *
+     * @param potId the ID of the pot to check for existence
+     * @return true if the pot exists, false otherwise
+     */
+    private boolean potExists(Long potId) {
+        return potRepo.existsById(potId);
     }
 
     private boolean isRebate(Transaction t) {
