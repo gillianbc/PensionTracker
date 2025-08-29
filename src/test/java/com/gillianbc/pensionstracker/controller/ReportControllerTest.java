@@ -1,48 +1,16 @@
 package com.gillianbc.pensionstracker.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gillianbc.pensionstracker.dto.PotDto;
 import com.gillianbc.pensionstracker.dto.ProviderDto;
-import com.gillianbc.pensionstracker.dto.SnapshotDto;
-import com.gillianbc.pensionstracker.repo.PotRepo;
-import com.gillianbc.pensionstracker.repo.ProviderRepo;
-import com.gillianbc.pensionstracker.repo.SnapshotRepo;
-import com.gillianbc.pensionstracker.repo.TransactionRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
-import static com.gillianbc.pensionstracker.controller.ApiControllerTest.TEST_DATE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class ReportControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ProviderRepo providerRepo;
-    @Autowired
-    private TransactionRepo transactionRepo;
-    @Autowired
-    private SnapshotRepo snapshotRepo;
-    @Autowired
-    private PotRepo potRepo;
+class ReportControllerTest extends AbstractControllerTest {
 
     @BeforeEach
     void tearDown() {
@@ -55,38 +23,29 @@ class ReportControllerTest {
     @Test
     void getReport_returnsReportDto() throws Exception {
         // Setup pot and provider
-        ProviderDto provider = new ProviderDto(null, "ReportProv", "");
-        String providerJson = objectMapper.writeValueAsString(provider);
-        String providerResponse = mockMvc.perform(post("/api/providers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(providerJson))
-                .andReturn().getResponse().getContentAsString();
-        ProviderDto savedProvider = objectMapper.readValue(providerResponse, ProviderDto.class);
+        ProviderDto provider = postProviderDto("TestProvider", "My notes");
 
-        PotDto pot = new PotDto(null, savedProvider.id(), "ReportPot",
-                "GBP", "ACTIVE", "", "", "");
-        String potJson = objectMapper.writeValueAsString(pot);
-        String potResponse = mockMvc.perform(post("/api/pots")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(potJson))
-                .andReturn().getResponse().getContentAsString();
-        PotDto savedPot = objectMapper.readValue(potResponse, PotDto.class);
+        PotDto pot = postPotDto(provider);
 
-        // create snapshot
-        SnapshotDto snapshot = new SnapshotDto(null, savedPot.id(), TEST_DATE, Double.valueOf(123.45), "USER", "Some note");
-        String snapJson = objectMapper.writeValueAsString(snapshot);
+        // create snapshot for start
+        postSnapshotDto(pot, 100.00, TEST_DATE);
+        postSnapshotDto(pot, 120.00, TEST_DATE.plusYears(1));
 
-
-
-        mockMvc.perform(get("/api/reports/" + savedPot.id()))
+        
+        mockMvc.perform(get("/api/reports/" + pot.id()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.potId").value(savedPot.id()))
-                .andExpect(jsonPath("$.fromDate").value(null))
-                .andExpect(jsonPath("$.toDate").value(null))
+                .andExpect(jsonPath("$.potId").value(pot.id()))
+                .andExpect(jsonPath("$.fromDate").value("2023-01-01"))
+                .andExpect(jsonPath("$.toDate").value("2024-01-01"))
+                .andExpect(jsonPath("$.openingBalance").value(100.00))
+                .andExpect(jsonPath("$.currentBalance").value(120.00))
+                .andExpect(jsonPath("$.contributionsExclRebates").value(0.0))
+                .andExpect(jsonPath("$.contributionsInclRebates").value(0.0))
+                .andExpect(jsonPath("$.netFlows").value(0.0))
+                .andExpect(jsonPath("$.growth").value(20.0))
+                .andExpect(jsonPath("$.cagrAnnualPercent").value((Object) 0.19999999999999996))
                 .andDo(print());
-        // {"potId":902,"fromDate":null,"toDate":null,"openingBalance":0.0,"currentBalance":0.0,
-        // "contributionsExclRebates":0.0,
-        // "contributionsInclRebates":0.0,"netFlows":0.0,"growth":0.0,"irrAnnualPercent":null}
+        
     }
 
     @Test

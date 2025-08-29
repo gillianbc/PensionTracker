@@ -22,6 +22,34 @@ public class ReportService {
     private final TransactionRepo txRepo;
     private final PotRepo potRepo;
 
+    /**
+     * <pre>Builds a detailed report for the specified pot identified by its ID.
+     *
+     * This method fetches data from different repositories, including snapshots
+     * and transactions, to construct a comprehensive financial report.
+     * If no data is found or if the pot does not exist, it either returns
+     * default values or null for cases like 404 handling.
+     *
+     * Each field in the returned {@link PotReportDto} has the following meaning:
+     * - potId: The unique identifier of the pot being reported on, directly derived from the input parameter.
+     * - from: The date of the first snapshot available for the pot, representing the earliest known state of the pot.
+     * - to: The date of the most recent snapshot, representing the latest known state of the pot.
+     * - opening: The balance of the pot on the `from` date, obtained from the first snapshot.
+     * - current: The balance of the pot on the `to` date, obtained from the last snapshot.
+     * - contribExclRebates: The total contributions to the pot, excluding any rebate transactions, calculated by summing relevant transaction amounts.
+     * - contribInclRebates: The total contributions to the pot, including rebate transactions, calculated by summing all inflows and rebates.
+     * - netFlows: The net total of all transaction amounts affecting the pot, including inflows and outflows.
+     * - growth: The monetary growth of the pot since the `from` date, calculated as `current - opening - netFlows`.
+     * - cagr: The compound annual growth rate (CAGR) as a percentage, representing the annualized rate of return on investments in the pot, inclusive of all cash flows and the terminal balance.
+     *
+     *
+     *
+     * </pre>
+     *
+     * @param potId the ID of the pot for which the report is being generated.
+     * @return a {@link PotReportDto} containing the financial details of the
+     *         pot, or null if the specified pot does not exist.
+     */
     public PotReportDto buildReport(Long potId) {
         // Check if the pot exists; if not, return null (for 404 handling)
         if (!potExists(potId)) {
@@ -79,11 +107,19 @@ public class ReportService {
 
         Double irr = xirr(dates, flows);
 
+        // Debug/logging to ensure all parameters are correct
+        if (from == null || to == null) {
+            throw new IllegalStateException("Invalid date range, 'fromDate' or 'toDate' is null");
+        }
+
+        if (opening <= 0 || current <= 0) {
+            throw new IllegalStateException("Invalid balances, 'openingBalance' or 'currentBalance' is less than or equal to 0");
+        }
+
         return new PotReportDto(
                 potId, from, to, opening, current,
                 round(contribExclRebates), round(contribInclRebates),
-                round(netFlows), round(growth),
-                irr == null ? null : round(irr * 100.0)
+                round(netFlows), round(growth)
         );
     }
 
