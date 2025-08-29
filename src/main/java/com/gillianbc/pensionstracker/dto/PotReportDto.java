@@ -11,9 +11,9 @@ public record PotReportDto(
         double currentBalance,
         double contributionsExclRebates,
         double contributionsInclRebates,
-        double netFlows,
         double growth,
-        Double cagrAnnualPercent // null if not computable
+        Double cagrAnnualPercent, // null if not computable
+        double growthPercent
 ) {
     public PotReportDto(
             Long potId,
@@ -23,7 +23,6 @@ public record PotReportDto(
             double currentBalance,
             double contributionsExclRebates,
             double contributionsInclRebates,
-            double netFlows,
             double growth
     ) {
         this(
@@ -34,10 +33,19 @@ public record PotReportDto(
                 currentBalance,
                 contributionsExclRebates,
                 contributionsInclRebates,
-                netFlows,
                 growth,
-                computeCAGR(openingBalance, currentBalance, fromDate, toDate)
+                computeCAGR(openingBalance, currentBalance, fromDate, toDate),
+                computeGrowthPercent(openingBalance, currentBalance, contributionsInclRebates)
+                
         );
+    }
+
+    private static Double computeGrowthPercent(double openingBalance, double currentBalance, double contributionsInclRebates) {
+        if (openingBalance <= 0) {
+            return null;
+        }
+        double growth = currentBalance - openingBalance - contributionsInclRebates;
+        return Math.round((growth / openingBalance * 100.0) ) / 100.0;
     }
 
     private static Double computeCAGR(double openingBalance, double currentBalance, LocalDate fromDate, LocalDate toDate) {

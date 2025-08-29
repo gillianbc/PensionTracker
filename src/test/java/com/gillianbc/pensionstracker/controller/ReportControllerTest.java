@@ -41,9 +41,9 @@ class ReportControllerTest extends AbstractControllerTest {
                 .andExpect(jsonPath("$.currentBalance").value(125.00))
                 .andExpect(jsonPath("$.contributionsExclRebates").value(0.0))
                 .andExpect(jsonPath("$.contributionsInclRebates").value(0.0))
-                .andExpect(jsonPath("$.netFlows").value(0.0))
                 .andExpect(jsonPath("$.growth").value(25.0))
                 .andExpect(jsonPath("$.cagrAnnualPercent").value((Object) 0.25))
+                .andExpect(jsonPath("$.growthPercent").value((Object) 0.25))
                 .andDo(print());
         
     }
