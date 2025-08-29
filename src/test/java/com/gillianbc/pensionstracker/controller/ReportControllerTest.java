@@ -29,7 +29,7 @@ class ReportControllerTest extends AbstractControllerTest {
 
         // create snapshot for start
         postSnapshotDto(pot, 100.00, TEST_DATE);
-        postSnapshotDto(pot, 120.00, TEST_DATE.plusYears(1));
+        postSnapshotDto(pot, 125.00, TEST_DATE.plusYears(1));
 
         
         mockMvc.perform(get("/api/reports/" + pot.id()))
@@ -38,12 +38,12 @@ class ReportControllerTest extends AbstractControllerTest {
                 .andExpect(jsonPath("$.fromDate").value("2023-01-01"))
                 .andExpect(jsonPath("$.toDate").value("2024-01-01"))
                 .andExpect(jsonPath("$.openingBalance").value(100.00))
-                .andExpect(jsonPath("$.currentBalance").value(120.00))
+                .andExpect(jsonPath("$.currentBalance").value(125.00))
                 .andExpect(jsonPath("$.contributionsExclRebates").value(0.0))
                 .andExpect(jsonPath("$.contributionsInclRebates").value(0.0))
                 .andExpect(jsonPath("$.netFlows").value(0.0))
-                .andExpect(jsonPath("$.growth").value(20.0))
-                .andExpect(jsonPath("$.cagrAnnualPercent").value((Object) 0.19999999999999996))
+                .andExpect(jsonPath("$.growth").value(25.0))
+                .andExpect(jsonPath("$.cagrAnnualPercent").value((Object) 0.25))
                 .andDo(print());
         
     }

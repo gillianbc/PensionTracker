@@ -57,7 +57,7 @@ public record PotReportDto(
         }
 
         double years = days / 365.0; // Convert days to years
-        return Math.pow(currentBalance / openingBalance, 1 / years) - 1; // CAGR formula
+        return Math.round((Math.pow(currentBalance / openingBalance, 1 / years) - 1) * 100.0) / 100.0; // CAGR formula rounded to 2 decimal places
     }
 }
 
